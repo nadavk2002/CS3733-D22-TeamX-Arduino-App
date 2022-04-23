@@ -18,8 +18,6 @@ const int pitch = 500;
 bool speakerOn = true;
 
 
-
-
 Timer speakerTimer(500);
 Timer resetScreen(3000);
 
@@ -34,6 +32,8 @@ void setup() {
   //start buttons
   pinMode(scroll, INPUT);
   pinMode(enter, INPUT);
+
+  //start wifi.
 
 
 }
