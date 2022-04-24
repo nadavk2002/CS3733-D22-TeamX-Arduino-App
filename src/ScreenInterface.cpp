@@ -9,3 +9,32 @@ void ScreenInterface::init(){
       lcd.begin(16,2); //initialize the LCD as 16 char long 2 tall display.
       lcd.clear();
 }
+void ScreenInterface::clearAll(){
+      lcd.clear();
+}
+
+void ScreenInterface::clearTopLine(){
+      lcd.clear();
+      lcd.setCursor(0,1);
+      lcd.print(bottomLine);
+}
+
+void ScreenInterface::clearBottomLine(){
+      lcd.clear();
+      lcd.setCursor(0,0);
+      lcd.print(topLine);
+}
+
+void ScreenInterface::updateTopLine(String text){
+      topLine = text;
+      clearTopLine();
+      lcd.setCursor(0,0);
+      lcd.print(topLine);
+}
+
+void ScreenInterface::updateBottomLine(String text){
+      bottomLine = text;
+      clearBottomLine();
+      lcd.setCursor(0,0);
+      lcd.print(topLine);
+}

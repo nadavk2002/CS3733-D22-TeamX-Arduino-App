@@ -6,6 +6,7 @@
 
 #include <Timer.h>
 #include <WiFi_config.h>
+#include <ScreenInterface.h>
 
 
 int status = WL_IDLE_STATUS;
@@ -26,11 +27,14 @@ bool speakerOn = true;
 
 Timer speakerTimer(500);
 Timer resetScreen(3000);
-
+ScreenInterface screen;
 
 
 
 void setup() {
+  //start screen
+  screen.init();
+
   
   // put your setup code here, to run once:
   //start usb serial coms
@@ -74,6 +78,8 @@ void setup() {
 
   Serial.println("connected to network");
 
+  Serial.print("ip: ");
+  Serial.println(WiFi.localIP());
 
 
 }
