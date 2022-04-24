@@ -40,10 +40,10 @@ void setup() {
   //start usb serial coms
   Serial.begin(115200);
 
-  //for debugging, remove this at some point after verifying system works while plugged into computer
-    while (!Serial) {
-    ; // wait for serial port to connect. Needed for native USB port only
-  }
+  // //for debugging, remove this at some point after verifying system works while plugged into computer
+  //   while (!Serial) {
+  //   ; // wait for serial port to connect. Needed for native USB port only
+  // }
 
   
   //start buttons
@@ -52,10 +52,11 @@ void setup() {
 
   //start wifi.
   //the network being connected to is a 2.4ghz being created by a windows 10 device using the mobile hotspot feature
-
     // check for the WiFi module:
   if (WiFi.status() == WL_NO_MODULE) {
     Serial.println("Communication with WiFi module failed!");
+    screen.updateTopLine("WiFi Module");
+    screen.updateBottomLine("not found");
     // don't continue
     while (true);
   }
@@ -63,13 +64,17 @@ void setup() {
     String fv = WiFi.firmwareVersion();
   if (fv < WIFI_FIRMWARE_LATEST_VERSION) {
     Serial.println("Please upgrade the firmware");
+    screen.updateTopLine("upgradeFW");
   }
 
   Serial.print("Attempting to connect to WPA SSID: ");
   Serial.println(ssid);
 
+
   // attempt to connect to WiFi network:
   while (status != WL_CONNECTED) {
+    screen.updateTopLine("connecting to:");
+    screen.updateBottomLine(ssid);
     // Connect to WPA/WPA2 network:
     status = WiFi.begin(ssid, pass);
     // wait 10 seconds for connection:
@@ -77,6 +82,7 @@ void setup() {
   }
 
   Serial.println("connected to network");
+  screen.updateTopLine("connected!");
 
   Serial.print("ip: ");
   Serial.println(WiFi.localIP());

@@ -35,6 +35,6 @@ void ScreenInterface::updateTopLine(String text){
 void ScreenInterface::updateBottomLine(String text){
       bottomLine = text;
       clearBottomLine();
-      lcd.setCursor(0,0);
-      lcd.print(topLine);
+      lcd.setCursor(0,1);
+      lcd.print(bottomLine);
 }
