@@ -41,10 +41,10 @@ void setup() {
   //start usb serial coms
   Serial.begin(115200);
 
-  //for debugging, remove this at some point after verifying system works while plugged into computer
-    while (!Serial) {
-    ; // wait for serial port to connect. Needed for native USB port only
-  }
+  // //for debugging, remove this at some point after verifying system works while plugged into computer
+  //   while (!Serial) {
+  //   ; // wait for serial port to connect. Needed for native USB port only
+  // }
 
   
   //start buttons
@@ -111,7 +111,7 @@ void loop() {
     noTone(speaker);
   
   } else if(digitalRead(scroll) == HIGH){
-    tone(speaker, 500);
+    tone(speaker, 600);
     Reply = "getData";
     Reply.toCharArray(replyBuffer, 256);
     Udp.beginPacket(WiFi.gatewayIP(), 1234);
