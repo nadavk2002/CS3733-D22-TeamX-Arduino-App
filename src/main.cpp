@@ -91,7 +91,7 @@ void setup() {
   Serial.print("gateway: ");
   Serial.println(WiFi.gatewayIP()); //the gateway will always be the java udp server due to the way this network is configured.
 
-  Udp.begin(1234);
+  Udp.begin(6587);
 }
 
 void loop() {
@@ -102,7 +102,7 @@ void loop() {
     tone(speaker, 500);
     Reply = "hello";
     Reply.toCharArray(replyBuffer, 256);
-    Udp.beginPacket(WiFi.gatewayIP(), 1234);
+    Udp.beginPacket(WiFi.gatewayIP(), 6587);
     Udp.write(replyBuffer);
     Serial.println(Udp.endPacket());
     while(digitalRead(enter) == HIGH){
@@ -114,7 +114,7 @@ void loop() {
     tone(speaker, 600);
     Reply = "getData";
     Reply.toCharArray(replyBuffer, 256);
-    Udp.beginPacket(WiFi.gatewayIP(), 1234);
+    Udp.beginPacket(WiFi.gatewayIP(), 6587);
     Udp.write(replyBuffer);
     Serial.println(Udp.endPacket());
     while(digitalRead(scroll) == HIGH){
