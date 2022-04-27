@@ -23,8 +23,9 @@ char packetBuffer[256]; //buffer to hold incoming packet
 
 
 
-const int scroll = 7;
+const int up = 7;
 const int enter = 8;
+const int down = 9;
 const int speaker = 2;
 
 ScreenInterface screen;
@@ -48,8 +49,9 @@ void setup() {
 
   
   //start buttons
-  pinMode(scroll, INPUT);
+  pinMode(up, INPUT);
   pinMode(enter, INPUT);
+  pinMode(down, INPUT);
 
   //start wifi.
   //the network being connected to is a 2.4ghz being created by a windows 10 device using the mobile hotspot feature
@@ -110,14 +112,25 @@ void loop() {
     }
     noTone(speaker);
   
-  } else if(digitalRead(scroll) == HIGH){
+  } else if(digitalRead(up) == HIGH){
     tone(speaker, 600);
     Reply = "getData";
     Reply.toCharArray(replyBuffer, 256);
     Udp.beginPacket(WiFi.gatewayIP(), 6587);
     Udp.write(replyBuffer);
     Serial.println(Udp.endPacket());
-    while(digitalRead(scroll) == HIGH){
+    while(digitalRead(up) == HIGH){
+      ;
+    }
+    noTone(speaker);
+  }else if(digitalRead(down) == HIGH){
+    tone(speaker, 600);
+    Reply = "getLIGHT";
+    Reply.toCharArray(replyBuffer, 256);
+    Udp.beginPacket(WiFi.gatewayIP(), 6587);
+    Udp.write(replyBuffer);
+    Serial.println(Udp.endPacket());
+    while(digitalRead(down) == HIGH){
       ;
     }
     noTone(speaker);
