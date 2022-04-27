@@ -14,20 +14,21 @@ int status = WL_IDLE_STATUS;
 char ssid[] = SECRET_SSID;
 char pass[] = SECRET_PASS;    
 
+WiFiUDP Udp;
+//IPAddress server(192,168,137,1);
+
+String Reply;       // a string to send back
+char replyBuffer[256];
+char packetBuffer[256]; //buffer to hold incoming packet
+
 
 
 const int scroll = 7;
 const int enter = 8;
 const int speaker = 2;
 
-
-const int pitch = 500;
-bool speakerOn = true;
-
-
-Timer speakerTimer(500);
-Timer resetScreen(3000);
 ScreenInterface screen;
+
 
 
 
@@ -87,10 +88,64 @@ void setup() {
   Serial.print("ip: ");
   Serial.println(WiFi.localIP());
 
+  Serial.print("gateway: ");
+  Serial.println(WiFi.gatewayIP()); //the gateway will always be the java udp server due to the way this network is configured.
 
+  Udp.begin(6587);
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
+  
+  //if button is pressed send udp packet
+  if(digitalRead(enter) == HIGH){
+    tone(speaker, 500);
+    Reply = "hello";
+    Reply.toCharArray(replyBuffer, 256);
+    Udp.beginPacket(WiFi.gatewayIP(), 6587);
+    Udp.write(replyBuffer);
+    Serial.println(Udp.endPacket());
+    while(digitalRead(enter) == HIGH){
+      ;
+    }
+    noTone(speaker);
+  
+  } else if(digitalRead(scroll) == HIGH){
+    tone(speaker, 600);
+    Reply = "getData";
+    Reply.toCharArray(replyBuffer, 256);
+    Udp.beginPacket(WiFi.gatewayIP(), 6587);
+    Udp.write(replyBuffer);
+    Serial.println(Udp.endPacket());
+    while(digitalRead(scroll) == HIGH){
+      ;
+    }
+    noTone(speaker);
+  }
+
+  int packetSize = Udp.parsePacket();
+  if (packetSize) {
+    Serial.print("Received packet of size ");
+    Serial.println(packetSize);
+    Serial.print("From ");
+    IPAddress remoteIp = Udp.remoteIP();
+    Serial.print(remoteIp);
+    Serial.print(", port ");
+    Serial.println(Udp.remotePort());
+
+    // read the packet into packetBufffer
+    int len = Udp.read(packetBuffer, 255);
+    if (len > 0) {
+      packetBuffer[len] = 0;
+    }
+    Serial.println("Contents:");
+    Serial.println(packetBuffer);
+
+    screen.clearAll();
+    screen.updateTopLine(packetBuffer);
+  }
+
+
+  delay(100);
 }
 

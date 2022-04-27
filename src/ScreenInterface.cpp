@@ -11,30 +11,34 @@ void ScreenInterface::init(){
 }
 void ScreenInterface::clearAll(){
       lcd.clear();
+      topLine = "";
+      bottomLine = "";
 }
 
 void ScreenInterface::clearTopLine(){
       lcd.clear();
+      topLine = "";
       lcd.setCursor(0,1);
       lcd.print(bottomLine);
 }
 
 void ScreenInterface::clearBottomLine(){
       lcd.clear();
+      bottomLine = "";
       lcd.setCursor(0,0);
       lcd.print(topLine);
 }
 
 void ScreenInterface::updateTopLine(String text){
-      topLine = text;
       clearTopLine();
       lcd.setCursor(0,0);
-      lcd.print(topLine);
+      lcd.print(text);
+      topLine = text;
 }
 
 void ScreenInterface::updateBottomLine(String text){
-      bottomLine = text;
       clearBottomLine();
       lcd.setCursor(0,1);
-      lcd.print(bottomLine);
+      lcd.print(text);
+      bottomLine = text;
 }
