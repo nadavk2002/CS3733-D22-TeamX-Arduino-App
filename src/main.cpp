@@ -30,6 +30,178 @@ const int speaker = 2;
 
 ScreenInterface screen;
 
+enum State{
+  temp,
+  fan,
+  lamp,
+  ip,
+  };
+
+  State state = ip;
+  boolean editMode = false;
+
+  String IP = "";
+  String LAMP = "off";
+  String FAN = "off";
+  String TEMP = "72";
+
+  bool lampState = false;
+  bool fanState = false;
+  double tempState = 72;
+  
+void setLAMP(String string);
+void setFAN(String string);
+void setTEMP(String string);
+
+void handleUpPress();
+void handleDownPress();
+void handleEnterPress();
+void updateScreenToState();
+
+void updateRemote();
+
+String ipToString(IPAddress ipAddress);
+String boolToString(bool thing);
+
+
+
+void setLAMP(String string){
+  LAMP = string;
+  if(string.equals(String("off"))){
+    lampState = false;
+  } else if(string.equals(String("on"))){
+    lampState = true;
+  }
+  updateScreenToState();
+  updateRemote();
+}
+void setFAN(String string){
+  FAN = string;
+  if(string.equals(String("off"))){
+    fanState = false;
+  } else if(string.equals(String("on"))){
+    fanState = true;
+  }
+  updateScreenToState();
+  updateRemote();
+}
+void setTEMP(String string){
+  TEMP = string;
+  tempState = string.toDouble();
+  updateScreenToState();
+  updateRemote();
+}
+
+void updateRemote(){
+  //update TEMP
+  Reply = "TEM" + String(tempState);
+  Reply.toCharArray(replyBuffer, 256);
+  Udp.beginPacket(WiFi.gatewayIP(), 6587);
+  Udp.write(replyBuffer);
+  Serial.println("PacketSent?" + Udp.endPacket());
+
+  //update LAMP
+  Reply = "LIT" + boolToString(lampState);
+  Reply.toCharArray(replyBuffer, 256);
+  Udp.beginPacket(WiFi.gatewayIP(), 6587);
+  Udp.write(replyBuffer);
+  Serial.println("PacketSent?" + Udp.endPacket());
+
+  //update FAN
+  Reply = "FAN" + boolToString(fanState);
+  Reply.toCharArray(replyBuffer, 256);
+  Udp.beginPacket(WiFi.gatewayIP(), 6587);
+  Udp.write(replyBuffer);
+  Serial.println("PacketSent?" + Udp.endPacket());
+
+
+}
+
+void handleUpPress(){
+  switch (state){
+    case temp:
+    state = ip;
+    break;
+    case fan:
+    state = temp;
+    break;
+    case lamp:
+    state = fan;
+    break;
+    case ip:
+    state = lamp;
+    break;
+    default:
+    state = ip;
+    break;
+  }
+  updateScreenToState();
+}
+
+void handleDownPress(){
+  switch (state){
+    case temp:
+    state = fan;
+    break;
+    case fan:
+    state = lamp;
+    break;
+    case lamp:
+    state = ip;
+    break;
+    case ip:
+    state = temp;
+    break;
+    default:
+    state = ip;
+    break;
+  }
+  updateScreenToState();
+}
+void handleEnterPress(){
+
+}
+
+void updateScreenToState(){
+  switch (state){
+    case temp:
+    screen.updateTopLine("Temperature:");
+    screen.updateBottomLine(TEMP);
+    break;
+    case fan:
+    screen.updateTopLine("Fan:");
+    screen.updateBottomLine(boolToString(fanState));
+    break;
+    case lamp:
+    screen.updateTopLine("Lamp");
+    screen.updateBottomLine(boolToString(lampState));
+    break;
+    case ip:
+    screen.updateTopLine("ip Adress");
+    screen.updateBottomLine(IP);
+    break;
+    default:
+    screen.updateTopLine("ip Adress");
+    screen.updateBottomLine(IP);
+    break;
+  }
+  Serial.println(fanState);
+}
+
+String ipToString(IPAddress ipAddress){
+  return String(ipAddress[0]) + String(".") +
+           String(ipAddress[1]) + String(".") +
+           String(ipAddress[2]) + String(".") +
+           String(ipAddress[3]);
+}
+
+String boolToString(bool thing){
+  if(thing){
+    return String("on");
+  }
+  return String("off");
+}
+
 
 
 
@@ -93,48 +265,70 @@ void setup() {
   Serial.print("gateway: ");
   Serial.println(WiFi.gatewayIP()); //the gateway will always be the java udp server due to the way this network is configured.
 
+  IP = ipToString(WiFi.localIP());
+
+
   Udp.begin(6587);
+
+  delay(250);
+  updateScreenToState();
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
   
   //if button is pressed send udp packet
-  if(digitalRead(enter) == HIGH){
-    tone(speaker, 500);
-    Reply = "hello";
-    Reply.toCharArray(replyBuffer, 256);
-    Udp.beginPacket(WiFi.gatewayIP(), 6587);
-    Udp.write(replyBuffer);
-    Serial.println(Udp.endPacket());
-    while(digitalRead(enter) == HIGH){
-      ;
-    }
-    noTone(speaker);
+  // if(digitalRead(enter) == HIGH){
+  //   tone(speaker, 500);
+  //   Reply = "hello";
+  //   Reply.toCharArray(replyBuffer, 256);
+  //   Udp.beginPacket(WiFi.gatewayIP(), 6587);
+  //   Udp.write(replyBuffer);
+  //   Serial.println(Udp.endPacket());
+  //   while(digitalRead(enter) == HIGH){
+  //     ;
+  //   }
+  //   noTone(speaker);
   
-  } else if(digitalRead(up) == HIGH){
-    tone(speaker, 600);
-    Reply = "getData";
-    Reply.toCharArray(replyBuffer, 256);
-    Udp.beginPacket(WiFi.gatewayIP(), 6587);
-    Udp.write(replyBuffer);
-    Serial.println(Udp.endPacket());
-    while(digitalRead(up) == HIGH){
-      ;
-    }
-    noTone(speaker);
-  }else if(digitalRead(down) == HIGH){
-    tone(speaker, 600);
-    Reply = "getLIGHT";
-    Reply.toCharArray(replyBuffer, 256);
-    Udp.beginPacket(WiFi.gatewayIP(), 6587);
-    Udp.write(replyBuffer);
-    Serial.println(Udp.endPacket());
-    while(digitalRead(down) == HIGH){
-      ;
-    }
-    noTone(speaker);
+  // } else if(digitalRead(up) == HIGH){
+  //   tone(speaker, 600);
+  //   Reply = "getData";
+  //   Reply.toCharArray(replyBuffer, 256);
+  //   Udp.beginPacket(WiFi.gatewayIP(), 6587);
+  //   Udp.write(replyBuffer);
+  //   Serial.println(Udp.endPacket());
+  //   while(digitalRead(up) == HIGH){
+  //     ;
+  //   }
+  //   noTone(speaker);
+  // }else if(digitalRead(down) == HIGH){
+  //   tone(speaker, 600);
+  //   Reply = "getLIGHT";
+  //   Reply.toCharArray(replyBuffer, 256);
+  //   Udp.beginPacket(WiFi.gatewayIP(), 6587);
+  //   Udp.write(replyBuffer);
+  //   Serial.println(Udp.endPacket());
+  //   while(digitalRead(down) == HIGH){
+  //     ;
+  //   }
+  //   noTone(speaker);
+  // }
+
+  //handle button presses
+  if(digitalRead(up) == HIGH){
+    handleUpPress();
+    while(digitalRead(up) == HIGH){;}
   }
+  if(digitalRead(down) == HIGH){
+    handleDownPress();
+    while(digitalRead(down) == HIGH){;}
+  }
+  if(digitalRead(enter) == HIGH){
+    handleEnterPress();
+    while(digitalRead(enter) == HIGH){;}
+  }
+
+
 
   int packetSize = Udp.parsePacket();
   if (packetSize) {
@@ -151,11 +345,50 @@ void loop() {
     if (len > 0) {
       packetBuffer[len] = 0;
     }
-    Serial.println("Contents:");
+    Serial.print("Contents: ");
     Serial.println(packetBuffer);
 
-    screen.clearAll();
-    screen.updateTopLine(packetBuffer);
+    // screen.clearAll();
+    // screen.updateBottomLine(packetBuffer);
+
+    //determine where the packet should go
+    //get type
+    char typeText[3] = "";
+    for(int i = 0; i <= 2; i++){
+      typeText[i] = packetBuffer[i];
+    }
+    //get info
+    char infoText[253] = "";
+    for(int i = 3; i <= sizeof(packetBuffer); i++){
+      infoText[i-3] = packetBuffer[i];
+    }
+
+    //screen.updateBottomLine(infoText);
+    Serial.println(infoText);
+
+    String type = String(typeText);
+    String compare = String("TEM");
+    //sort it out
+    if(type.equals(compare)){
+      setTEMP(infoText);
+    }
+    compare = String("LIT");
+    if(type.equals(compare)){
+      setLAMP(infoText);
+    }
+    compare = String("FAN");
+    if(type.equals(compare)){
+      setFAN(infoText);
+    }
+    compare = String("GET");
+    if(type.equals(compare)){
+      updateRemote();
+    }
+
+    //screen.updateBottomLine(infoText);
+
+    
+
   }
 
 
