@@ -380,6 +380,10 @@ void loop() {
     if(type.equals(compare)){
       setFAN(infoText);
     }
+    compare = String("GET");
+    if(type.equals(compare)){
+      updateRemote();
+    }
 
     //screen.updateBottomLine(infoText);
 
