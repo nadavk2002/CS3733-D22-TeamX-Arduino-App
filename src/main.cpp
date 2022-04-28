@@ -15,7 +15,6 @@ char ssid[] = SECRET_SSID;
 char pass[] = SECRET_PASS;    
 
 WiFiUDP Udp;
-//IPAddress server(192,168,137,1);
 
 String Reply;       // a string to send back
 char replyBuffer[256];
@@ -26,7 +25,9 @@ char packetBuffer[256]; //buffer to hold incoming packet
 const int up = 7;
 const int enter = 8;
 const int down = 9;
-const int speaker = 2;
+
+const int fanPin = 1;
+const int lampPin = 2;
 
 ScreenInterface screen;
 
@@ -57,6 +58,7 @@ void handleEnterPress();
 void updateScreenToState();
 
 void updateRemote();
+void updateHardWare();
 
 String ipToString(IPAddress ipAddress);
 String boolToString(bool thing);
@@ -71,6 +73,7 @@ void setLAMP(String string){
   }
   updateScreenToState();
   updateRemote();
+  updateHardWare();
 }
 void setFAN(String string){
   if(string.equals(String("off"))){
@@ -80,6 +83,7 @@ void setFAN(String string){
   }
   updateScreenToState();
   updateRemote();
+  updateHardWare();
 }
 void setTEMP(String string){
   TEMP = string;
@@ -109,8 +113,11 @@ void updateRemote(){
   Udp.beginPacket(WiFi.gatewayIP(), 6587);
   Udp.write(replyBuffer);
   Serial.println("PacketSent?" + Udp.endPacket());
+}
 
-
+void updateHardWare(){
+  digitalWrite(fanPin, fanState);
+  digitalWrite(lampPin, lampState);
 }
 
 void handleUpPress(){
@@ -175,11 +182,15 @@ void handleEnterPress(){
       fanState = !fanState;
       updateScreenToState();
       updateRemote();
+      updateHardWare();
+      
     break;
     case lamp:
       lampState = !lampState;
       updateScreenToState();
       updateRemote();
+      updateHardWare();
+      
     break;
     case ip:
     break;
@@ -259,6 +270,8 @@ void setup() {
   pinMode(up, INPUT);
   pinMode(enter, INPUT);
   pinMode(down, INPUT);
+  pinMode(lampPin, OUTPUT);
+  pinMode(fanPin, OUTPUT);
 
   //start wifi.
   //the network being connected to is a 2.4ghz being created by a windows 10 device using the mobile hotspot feature
@@ -310,45 +323,6 @@ void setup() {
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-  
-  //if button is pressed send udp packet
-  // if(digitalRead(enter) == HIGH){
-  //   tone(speaker, 500);
-  //   Reply = "hello";
-  //   Reply.toCharArray(replyBuffer, 256);
-  //   Udp.beginPacket(WiFi.gatewayIP(), 6587);
-  //   Udp.write(replyBuffer);
-  //   Serial.println(Udp.endPacket());
-  //   while(digitalRead(enter) == HIGH){
-  //     ;
-  //   }
-  //   noTone(speaker);
-  
-  // } else if(digitalRead(up) == HIGH){
-  //   tone(speaker, 600);
-  //   Reply = "getData";
-  //   Reply.toCharArray(replyBuffer, 256);
-  //   Udp.beginPacket(WiFi.gatewayIP(), 6587);
-  //   Udp.write(replyBuffer);
-  //   Serial.println(Udp.endPacket());
-  //   while(digitalRead(up) == HIGH){
-  //     ;
-  //   }
-  //   noTone(speaker);
-  // }else if(digitalRead(down) == HIGH){
-  //   tone(speaker, 600);
-  //   Reply = "getLIGHT";
-  //   Reply.toCharArray(replyBuffer, 256);
-  //   Udp.beginPacket(WiFi.gatewayIP(), 6587);
-  //   Udp.write(replyBuffer);
-  //   Serial.println(Udp.endPacket());
-  //   while(digitalRead(down) == HIGH){
-  //     ;
-  //   }
-  //   noTone(speaker);
-  // }
-
   //handle button presses
   if(digitalRead(up) == HIGH){
     handleUpPress();
@@ -363,7 +337,7 @@ void loop() {
     while(digitalRead(enter) == HIGH){;}
   }
 
-
+//parse packets
 
   int packetSize = Udp.parsePacket();
   if (packetSize) {
