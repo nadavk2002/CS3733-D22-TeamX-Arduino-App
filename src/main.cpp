@@ -185,6 +185,7 @@ void updateScreenToState(){
     screen.updateBottomLine(IP);
     break;
   }
+  Serial.println(fanState);
 }
 
 String ipToString(IPAddress ipAddress){
@@ -344,11 +345,11 @@ void loop() {
     if (len > 0) {
       packetBuffer[len] = 0;
     }
-    Serial.println("Contents:");
+    Serial.print("Contents: ");
     Serial.println(packetBuffer);
 
-    //screen.clearAll();
-    screen.updateBottomLine(packetBuffer);
+    // screen.clearAll();
+    // screen.updateBottomLine(packetBuffer);
 
     //determine where the packet should go
     //get type
@@ -363,12 +364,12 @@ void loop() {
     }
 
     screen.updateBottomLine(infoText);
+    Serial.println(infoText);
 
     String type = String(typeText);
     String compare = String("TEM");
     //sort it out
     if(type.equals(compare)){
-
       setTEMP(infoText);
     }
     compare = String("LIT");
