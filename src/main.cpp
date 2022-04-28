@@ -170,11 +170,11 @@ void updateScreenToState(){
     break;
     case fan:
     screen.updateTopLine("Fan:");
-    screen.updateBottomLine(FAN);
+    screen.updateBottomLine(boolToString(fanState));
     break;
     case lamp:
     screen.updateTopLine("Lamp");
-    screen.updateBottomLine(LAMP);
+    screen.updateBottomLine(boolToString(lampState));
     break;
     case ip:
     screen.updateTopLine("ip Adress");
@@ -196,7 +196,7 @@ String ipToString(IPAddress ipAddress){
 }
 
 String boolToString(bool thing){
-  if(true){
+  if(thing){
     return String("on");
   }
   return String("off");
@@ -363,7 +363,7 @@ void loop() {
       infoText[i-3] = packetBuffer[i];
     }
 
-    screen.updateBottomLine(infoText);
+    //screen.updateBottomLine(infoText);
     Serial.println(infoText);
 
     String type = String(typeText);
