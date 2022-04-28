@@ -41,8 +41,6 @@ enum State{
   boolean editMode = false;
 
   String IP = "";
-  String LAMP = "off";
-  String FAN = "off";
   String TEMP = "72";
 
   bool lampState = false;
@@ -66,7 +64,6 @@ String boolToString(bool thing);
 
 
 void setLAMP(String string){
-  LAMP = string;
   if(string.equals(String("off"))){
     lampState = false;
   } else if(string.equals(String("on"))){
@@ -76,7 +73,6 @@ void setLAMP(String string){
   updateRemote();
 }
 void setFAN(String string){
-  FAN = string;
   if(string.equals(String("off"))){
     fanState = false;
   } else if(string.equals(String("on"))){
@@ -120,7 +116,12 @@ void updateRemote(){
 void handleUpPress(){
   switch (state){
     case temp:
-    state = ip;
+    if(editMode){
+      tempState = tempState + 0.5;
+      setTEMP(String(tempState));
+    }else{
+      state = ip;
+    }
     break;
     case fan:
     state = temp;
@@ -141,7 +142,13 @@ void handleUpPress(){
 void handleDownPress(){
   switch (state){
     case temp:
-    state = fan;
+    if(editMode){
+      tempState = tempState - 0.5;
+      setTEMP(String(tempState));
+    }else{
+      state = fan;
+    }
+
     break;
     case fan:
     state = lamp;
@@ -159,14 +166,42 @@ void handleDownPress(){
   updateScreenToState();
 }
 void handleEnterPress(){
+  switch (state){
+    case temp:
+      editMode = !editMode;
+      updateScreenToState();
+    break;
+    case fan:
+      fanState = !fanState;
+      updateScreenToState();
+      updateRemote();
+    break;
+    case lamp:
+      lampState = !lampState;
+      updateScreenToState();
+      updateRemote();
+    break;
+    case ip:
+    break;
+    default:
+    state = ip;
+    break;
+  }
 
 }
 
 void updateScreenToState(){
   switch (state){
     case temp:
-    screen.updateTopLine("Temperature:");
-    screen.updateBottomLine(TEMP);
+    if(editMode){
+      screen.updateTopLine("Temperature:");
+      String DrawString = TEMP + String(" *");
+      screen.updateBottomLine(DrawString);
+    }
+    else{
+      screen.updateTopLine("Temperature:");
+      screen.updateBottomLine(TEMP);
+    }
     break;
     case fan:
     screen.updateTopLine("Fan:");
