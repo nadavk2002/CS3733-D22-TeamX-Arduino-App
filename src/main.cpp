@@ -49,16 +49,73 @@ enum State{
   bool fanState = false;
   double tempState = 72;
   
+void setLAMP(String string);
+void setFAN(String string);
+void setTEMP(String string);
 
 void handleUpPress();
 void handleDownPress();
 void handleEnterPress();
 void updateScreenToState();
 
+void updateRemote();
+
 String ipToString(IPAddress ipAddress);
+String boolToString(bool thing);
 
 
 
+void setLAMP(String string){
+  LAMP = string;
+  if(string.equals(String("off"))){
+    lampState = false;
+  } else if(string.equals(String("on"))){
+    lampState = true;
+  }
+  updateScreenToState();
+  updateRemote();
+}
+void setFAN(String string){
+  FAN = string;
+  if(string.equals(String("off"))){
+    fanState = false;
+  } else if(string.equals(String("on"))){
+    fanState = true;
+  }
+  updateScreenToState();
+  updateRemote();
+}
+void setTEMP(String string){
+  TEMP = string;
+  tempState = string.toDouble();
+  updateScreenToState();
+  updateRemote();
+}
+
+void updateRemote(){
+  //update TEMP
+  Reply = "TEM" + String(tempState);
+  Reply.toCharArray(replyBuffer, 256);
+  Udp.beginPacket(WiFi.gatewayIP(), 6587);
+  Udp.write(replyBuffer);
+  Serial.println("PacketSent?" + Udp.endPacket());
+
+  //update LAMP
+  Reply = "LIT" + boolToString(lampState);
+  Reply.toCharArray(replyBuffer, 256);
+  Udp.beginPacket(WiFi.gatewayIP(), 6587);
+  Udp.write(replyBuffer);
+  Serial.println("PacketSent?" + Udp.endPacket());
+
+  //update FAN
+  Reply = "FAN" + boolToString(fanState);
+  Reply.toCharArray(replyBuffer, 256);
+  Udp.beginPacket(WiFi.gatewayIP(), 6587);
+  Udp.write(replyBuffer);
+  Serial.println("PacketSent?" + Udp.endPacket());
+
+
+}
 
 void handleUpPress(){
   switch (state){
@@ -135,6 +192,13 @@ String ipToString(IPAddress ipAddress){
            String(ipAddress[1]) + String(".") +
            String(ipAddress[2]) + String(".") +
            String(ipAddress[3]);
+}
+
+String boolToString(bool thing){
+  if(true){
+    return String("on");
+  }
+  return String("off");
 }
 
 
@@ -285,6 +349,41 @@ void loop() {
 
     //screen.clearAll();
     screen.updateBottomLine(packetBuffer);
+
+    //determine where the packet should go
+    //get type
+    char typeText[3] = "";
+    for(int i = 0; i <= 2; i++){
+      typeText[i] = packetBuffer[i];
+    }
+    //get info
+    char infoText[253] = "";
+    for(int i = 3; i <= sizeof(packetBuffer); i++){
+      infoText[i-3] = packetBuffer[i];
+    }
+
+    screen.updateBottomLine(infoText);
+
+    String type = String(typeText);
+    String compare = String("TEM");
+    //sort it out
+    if(type.equals(compare)){
+
+      setTEMP(infoText);
+    }
+    compare = String("LIT");
+    if(type.equals(compare)){
+      setLAMP(infoText);
+    }
+    compare = String("FAN");
+    if(type.equals(compare)){
+      setFAN(infoText);
+    }
+
+    //screen.updateBottomLine(infoText);
+
+    
+
   }
 
 
