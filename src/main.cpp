@@ -1,4 +1,5 @@
 //fundamentally this should work that the buttons send requests when read and get updated when 
+//Future review: reflecting upon the latency but the functionality is what excited the crowds
 //latency will be garbage
 #include <Arduino.h>
 #include <WiFiNINA.h>
